@@ -52,9 +52,16 @@ export default function App() {
           playBeep(150, 800)
         }
 
-        // Final countdown (5, 4, 3, 2, 1 seconds)
-        if (newTime > 0 && newTime <= FINAL_COUNTDOWN_START) {
+        // Final countdown (5, 4, 3, 2, 1 seconds) - 2 beeps
+        if (newTime > 1 && newTime <= FINAL_COUNTDOWN_START) {
           playBeep(100, 600)
+          setTimeout(() => playBeep(100, 600), 150)
+        }
+
+        // First/last second - 2 beeps
+        if (newTime === 1) {
+          playBeep(100, 600)
+          setTimeout(() => playBeep(100, 600), 150)
         }
 
         // End of round - 3 short beeps

@@ -88,9 +88,16 @@ export default function HomeScreen() {
           playBeep(800, 150);
         }
 
-        // Final countdown (5, 4, 3, 2, 1 seconds)
-        if (newTime > 0 && newTime <= FINAL_COUNTDOWN_START) {
+        // Final countdown (5, 4, 3, 2, 1 seconds) - 2 beeps
+        if (newTime > 1 && newTime <= FINAL_COUNTDOWN_START) {
           playBeep(600, 100);
+          setTimeout(() => playBeep(600, 100), 150);
+        }
+
+        // First/last second - 2 beeps
+        if (newTime === 1) {
+          playBeep(600, 100);
+          setTimeout(() => playBeep(600, 100), 150);
         }
 
         // End of round - 3 short beeps
