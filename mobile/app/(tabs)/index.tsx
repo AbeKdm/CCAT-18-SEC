@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [isRunning, setIsRunning] = useState(false);
   const [totalElapsed, setTotalElapsed] = useState(0);
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const soundRef = useRef<Audio.Sound | null>(null);
 
   // Initialize audio context
