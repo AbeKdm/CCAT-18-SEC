@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [isRunning, setIsRunning] = useState(false);
   const [totalElapsed, setTotalElapsed] = useState(0);
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
 
   // Initialize audio context
@@ -83,28 +83,26 @@ export default function HomeScreen() {
       setTimeLeft((prev) => {
         const newTime = prev - 1;
 
+        // Round starts (18 seconds) - 2 short beeps
+        if (newTime === ROUND_DURATION) {
+          playBeep(1000, 80);
+          setTimeout(() => playBeep(1000, 80), 150);
+        }
+
         // Half time beep (9 seconds)
         if (newTime === HALF_TIME) {
           playBeep(800, 150);
         }
 
-        // Final countdown (5, 4, 3, 2, 1 seconds) - 2 beeps
-        if (newTime > 1 && newTime <= FINAL_COUNTDOWN_START) {
+        // Final countdown (5, 4, 3, 2, 1 seconds) - 1 beep per second
+        if (newTime > 0 && newTime <= FINAL_COUNTDOWN_START) {
           playBeep(600, 100);
-          setTimeout(() => playBeep(600, 100), 150);
         }
 
-        // First/last second - 2 beeps
-        if (newTime === 1) {
-          playBeep(600, 100);
-          setTimeout(() => playBeep(600, 100), 150);
-        }
-
-        // End of round - 3 short beeps
+        // End of round - 2 short beeps
         if (newTime === 0) {
           playBeep(1000, 80);
           setTimeout(() => playBeep(1000, 80), 150);
-          setTimeout(() => playBeep(1000, 80), 300);
 
           // Restart the loop
           return ROUND_DURATION;
