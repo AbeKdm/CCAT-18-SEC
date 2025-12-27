@@ -1,0 +1,12 @@
+{
+  "name": "ccat-timer-static",
+  "version": "1.0.0",
+  "description": "CCAT Countdown Timer - Static HTML Version",
+  "scripts": {
+    "start": "http-server -p 3000",
+    "dev": "http-server -p 3000 -c-1"
+  },
+  "keywords": ["timer", "ccat"],
+  "author": "",
+  "license": "MIT"
+}
