@@ -43,7 +43,7 @@ export default function HomeScreen() {
   }, []);
 
   // Generate and play beep
-  const playBeep = async (frequency: number = 800, duration: number = 100) => {
+  const playBeep2 = async (frequency: number = 800, duration: number = 100) => {
     try {
       // Create a simple beep using a data URI (web audio format converted to base64)
       // For simplicity, we'll use the native sound system
@@ -74,6 +74,24 @@ export default function HomeScreen() {
       console.log('Beep error:', error);
     }
   };
+
+  const playBeep = async (frequency: number = 800, duration: number = 100) => {
+  try {
+    // Select audio file based on frequency
+    const audioFile = frequency > 700 ? require('../../assets/sounds/beep-high.mp3') : require('../../assets/sounds/beep-low.mp3');
+    
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+    }
+    
+    const { sound } = await Audio.Sound.createAsync(audioFile);
+    soundRef.current = sound;
+    await soundRef.current.playAsync();
+  } catch (error) {
+    console.log('Beep error:', error);
+  }
+};
+
 
   // Timer loop
   useEffect(() => {
