@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCAT Timer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: white;
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    .total-time {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 18px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .timer-display {
+      margin: 50px 0;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .time {
+      font-size: 120px;
+      font-weight: bold;
+      color: white;
+      font-family: 'Courier New', monospace;
+      min-width: 150px;
+      text-align: right;
+    }
+
+    .unit {
+      font-size: 28px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 20px;
+    }
+
+    .restart-button {
+      width: 160px;
+      height: 160px;
+      border-radius: 80px;
+      background: white;
+      border: none;
+      font-size: 60px;
+      font-weight: bold;
+      color: #667eea;
+      cursor: pointer;
+      margin: 30px auto;
+      display: block;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .restart-button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .restart-button:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .restart-button.running {
+      opacity: 0.85;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .control-button {
+      padding: 18px 40px;
+      border-radius: 12px;
+      border: 2px solid;
+      background: white;
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 150px;
+    }
+
+    .start-button {
+      border-color: #4CAF50;
+      color: #4CAF50;
+    }
+
+    .start-button:hover:not(:disabled) {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .stop-button {
+      border-color: #f44336;
+      color: #f44336;
+    }
+
+    .stop-button:hover:not(:disabled) {
+      background: #f44336;
+      color: white;
+    }
+
+    .control-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      color: #999;
+      border-color: #999;
+    }
+
+    .status {
+      margin-top: 30px;
+      color: white;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .time {
+        font-size: 80px;
+        min-width: 100px;
+      }
+
+      .unit {
+        font-size: 20px;
+      }
+
+      .restart-button {
+        width: 140px;
+        height: 140px;
+        border-radius: 70px;
+        font-size: 50px;
+      }
+
+      .control-button {
+        flex: 1;
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>CCAT Timer</h1>
+        <div class="total-time">
+          <span id="minutes">0</span>:<span id="seconds">00</span>
+        </div>
+      </div>
+
+      <!-- Timer Display -->
+      <div class="timer-display">
+        <div class="time" id="timeDisplay">18</div>
+        <div class="unit">sec</div>
+      </div>
+
+      <!-- Restart Button -->
+      <button class="restart-button" id="restartBtn">RE</button>
+
+      <!-- Control Buttons -->
+      <div class="controls">
+        <button class="control-button start-button" id="startBtn">START</button>
+        <button class="control-button stop-button" id="stopBtn" disabled>STOP</button>
+      </div>
+
+      <!-- Status -->
+      <div class="status" id="status">⏸️ Stopped</div>
+    </div>
+  </div>
+
+  <script>
+    const ROUND_DURATION = 18;
+    const HALF_TIME = 9;
+    const FINAL_COUNTDOWN_START = 5;
+
+    let timeLeft = ROUND_DURATION;
+    let totalElapsed = 0;
+    let isRunning = false;
+    let intervalId = null;
+    let audioContext = null;
+
+    // Initialize AudioContext
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Play a beep sound
+    function playBeep(duration = 100, frequency = 800) {
+      if (!audioContext) initAudioContext();
+
+      const ctx = audioContext;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.frequency.value = frequency;
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration / 1000);
+    }
+
+    // Update display
+    function updateDisplay() {
+      document.getElementById('timeDisplay').textContent = String(timeLeft).padStart(2, '0');
+
+      const minutes = Math.floor(totalElapsed / 60);
+      const seconds = totalElapsed % 60;
+      document.getElementById('minutes').textContent = minutes;
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = isRunning ? '⏱️ Running' : '⏸️ Stopped';
+    }
+
+    // Timer loop
+    function startTimer() {
+      if (isRunning) return;
+
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      document.getElementById('restartBtn').classList.add('running');
+
+      intervalId = setInterval(() => {
+        timeLeft--;
+
+        // Round starts (18 seconds) - 2 short beeps
+        if (timeLeft === ROUND_DURATION) {
+          playBeep(80, 1000);
+          setTimeout(() => playBeep(80, 1000), 150);
+        }
+
+        // Half time beep (9 seconds)
+        if (timeLeft === HALF_TIME) {
+          playBeep(150, 800);
+        }
+
+        // Final countdown (5, 4, 3, 2, 1 seconds) - 1 beep per second
+        if (timeLeft > 0 && timeLeft <= FINAL_COUNTDOWN_START) {
+          playBeep(100, 600);
+        }
+
+        // End of round - 2 short beeps
+        if (timeLeft === 0) {
+          playBeep(80, 1000);
+          setTimeout(() => playBeep(80, 1000), 150);
+
+          // Restart the loop
+          timeLeft = ROUND_DURATION;
+        }
+
+        totalElapsed++;
+        updateDisplay();
+      }, 1000);
+    }
+
+    // Stop timer
+    function stopTimer() {
+      if (!isRunning) return;
+
+      isRunning = false;
+      clearInterval(intervalId);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('restartBtn').classList.remove('running');
+
+      updateDisplay();
+    }
+
+    // Restart timer
+    function restartTimer() {
+      clearInterval(intervalId);
+      timeLeft = ROUND_DURATION;
+      totalElapsed = 0;
+      isRunning = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('restartBtn').classList.remove('running');
+
+      updateDisplay();
+      startTimer();
+    }
+
+    // Event listeners
+    document.getElementById('startBtn').addEventListener('click', startTimer);
+    document.getElementById('stopBtn').addEventListener('click', stopTimer);
+    document.getElementById('restartBtn').addEventListener('click', restartTimer);
+
+    // Initialize display
+    updateDisplay();
+
+    // Resume AudioContext on first user interaction
+    document.addEventListener('click', () => {
+      initAudioContext();
+    });
+  </script>
+</body>
+</html>

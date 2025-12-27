@@ -47,22 +47,26 @@ export default function App() {
       setTimeLeft(prev => {
         const newTime = prev - 1
 
+        // Round starts (18 seconds) - 2 short beeps
+        if (newTime === ROUND_DURATION) {
+          playBeep(80, 1000)
+          setTimeout(() => playBeep(80, 1000), 150)
+        }
+
         // Half time beep (9 seconds)
         if (newTime === HALF_TIME) {
           playBeep(150, 800)
         }
 
-        // Final countdown (5, 4, 3, 2, 1 seconds)
+        // Final countdown (5, 4, 3, 2, 1 seconds) - 1 beep per second
         if (newTime > 0 && newTime <= FINAL_COUNTDOWN_START) {
           playBeep(100, 600)
         }
 
-        // End of round - 3 short beeps
+        // End of round - 2 short beeps
         if (newTime === 0) {
-          // Play 3 short beeps with delay
           playBeep(80, 1000)
           setTimeout(() => playBeep(80, 1000), 150)
-          setTimeout(() => playBeep(80, 1000), 300)
 
           // Restart the loop
           return ROUND_DURATION
